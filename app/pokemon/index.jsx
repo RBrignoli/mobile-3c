@@ -1,20 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, SafeAreaView, ImageBackground, Image } from 'react-native';
+import { View, Text, Button, StyleSheet, SafeAreaView, ImageBackground, Image, Modal, Pressable } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { Link } from 'expo-router'
 
 export default PokemonScreen = () => {
+  const [allPokemons, setAllPokemons] = useState([]);
   const [pokemons, setPokemons] = useState([]);
   const [selectedPokemon, setSelectedPokemon] = useState('');
   const [opponentPokemon, setOpponentPokemon] = useState('');
   const [types, setTypes] = useState([]);
   const [selectedType, setSelectedType] = useState('');
   const [pokemonImg, setPokemonImg] = useState('')
+  const [opponentImg, setOpponentImg] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     fetch('https://pokeapi.co/api/v2/type')
       .then(response => response.json())
       .then(data => setTypes(data.results))
       .catch(error => console.error('Error fetching Pokémon types:', error));
+    fetch(`https://pokeapi.co/api/v2/pokemon?limit:1000`)
+      .then(response => response.json())
+      .then(data => setAllPokemons(data.results))
+      .catch(error => console.error('Error fetching Pokémon by type:', error));
+
   }, []);
 
   useEffect(() => {
@@ -30,16 +39,25 @@ export default PokemonScreen = () => {
     if (selectedPokemon) {
       fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemon}`)
         .then(response => response.json())
-        .then(data => setPokemonImg(data))
+        .then(data => setPokemonImg(data.sprites))
         .catch(error => console.error('Error fetching Pokémon by type:', error));
     }
   }, [selectedPokemon]);
 
-  const handleBattle = () => {
-    const randomIndex = Math.floor(Math.random() * pokemons.length);
-    setOpponentPokemon(pokemons[randomIndex].name);
-  };
+  useEffect(() => {
+    if (opponentPokemon) {
+      fetch(opponentPokemon.url)
+        .then(response => response.json())
+        .then(data => setOpponentImg(data.sprites.front_default))
+        .catch(error => console.error('Error fetching Pokémon by type:', error));
+    }
+  }, [opponentPokemon]);
 
+  const handleBattle = () => {
+    const randomIndex = Math.floor(Math.random() * allPokemons.length);
+    setOpponentPokemon(allPokemons[randomIndex]);
+    setIsModalOpen(true)
+  };
   return (
     <SafeAreaView >
       <ImageBackground
@@ -69,10 +87,30 @@ export default PokemonScreen = () => {
               ))}
             </Picker>
           </View>
-          {pokemonImg? <Image
-            style={styles.image}
-            source={{ uri: pokemonImg.sprites.back_default }}
-          />:''}
+          {selectedPokemon ? <Button onPress={handleBattle} title='batalhar'></Button> : null}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isModalOpen}
+            onRequestClose={() => {
+              setIsModalOpen(!isModalOpen);
+            }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <ImageBackground
+                source={{ uri: 'https://art.pixilart.com/3d21237dd0410ba.png' }}
+                style={styles.bgImage}>
+                  <Image
+                    style={styles.image2}
+                    source={{ uri: opponentImg }} />
+                  <Image
+                    style={styles.image}
+                    source={{ uri: pokemonImg.back_default }} />
+                  <Text style={styles.modalText}>{selectedPokemon} vai bate de frente com {opponentPokemon.name}</Text>
+                </ImageBackground>
+              </View>
+            </View>
+          </Modal>
         </View>
       </ImageBackground>
     </SafeAreaView>
@@ -100,7 +138,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   bgImage: {
-    height: '100%'
+    height: '100%',
+    width:'100%',
+    borderRadius:20
   },
   pickerContainer: {
     marginTop: 300
@@ -108,6 +148,42 @@ const styles = StyleSheet.create({
   image: {
     width: 150,
     height: 150,
+    alignSelf:'flex-start',
+    marginTop:30
   },
+  image2: {
+    width: 150,
+    height: 150,
+    alignSelf:'flex-end',
+    marginTop:160
+
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22
+  },
+  modalView: {
+    flex:1,
+    margin: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width:'80%'
+  },
+  modalText:{
+    alignSelf:'center',
+    marginTop:30,
+    fontSize:15,
+    fontWeight:'bold'
+  }
 });
 

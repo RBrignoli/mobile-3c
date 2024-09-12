@@ -68,9 +68,9 @@ const App = () => {
       </View>
 
       <Text>o valor é {resultado}</Text>
-      <View>
-        <Link href="/calculadora2">Calculadora 2</Link>
-      </View>
+      <OutroButton title='botao' />
+
+      
     </View>
   );
 };
