@@ -11,15 +11,13 @@ const viagens = [
 const TelaViagens = () => {
   return (
     <View style={styles.container}>
-      <Header title="Viagens" voltarPara="/sobre-mim" />
+      <Header title="<- Viagens" voltarPara="/sobre-mim" />
       <FlatList
         data={viagens}
-        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Image source={{ uri: item.image }} style={styles.image} />
-            <Text style={styles.title}>{item.title}</Text>
-            <Text>{item.year}</Text>
+            <Text style={styles.title}>{item.title} - {item.year}</Text>
           </View>
         )}
       />

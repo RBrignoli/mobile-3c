@@ -16,7 +16,7 @@ const filmes = [
 const TelaFilmes = () => {
   return (
     <View style={styles.container}>
-      <Header title="Filmes" voltarPara="/sobre-mim" />
+      <Header title="<- Filmes" voltarPara="/sobre-mim" />
       <ScrollView>
         {filmes.map((filme, index) => (
           <View key={index} style={styles.card}>
